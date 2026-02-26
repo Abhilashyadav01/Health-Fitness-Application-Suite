@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Your Health Suite</title>
+    <!-- Tailwind CSS CDN for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f0fdf4; }
+        .card { backdrop-filter: blur(10px); background-color: rgba(255, 255, 255, 0.9); border: 1px solid #d1fae5; }
+        .results-box::-webkit-scrollbar { width: 8px; }
+        .results-box::-webkit-scrollbar-thumb { background-color: #10b981; border-radius: 4px; }
+        .btn-primary { background-color: #4CAF50; transition: background-color 0.2s; }
+        .btn-primary:hover { background-color: #45a049; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="container max-w-4xl w-full p-6 sm:p-10 card rounded-xl shadow-2xl">
+        <header class="text-center mb-8">
+            <!-- Flask passes the user_email variable here -->
+            <h1 class="text-4xl font-extrabold text-emerald-600">Welcome, {{ user_email }}!</h1>
+            <p class="text-gray-500 mt-2">We're thrilled to have you here. Your Health & Fitness Suite is ready. 
+                Start by checking your posture, finding a mood-boosting meal, or taking a minute for mindfulness.</p>
+        </header>
+
+        <!-- PosturePal Section -->
+        <div class="mb-8 p-6 bg-emerald-50 rounded-lg border border-emerald-200 shadow-md flex justify-between items-center">
+            <h2 class="text-xl font-bold text-emerald-800">PosturePal 🧘</h2>
+            <form id="postureForm" onsubmit="launchPosturePal(event)">
+                <button type="submit" class="btn-primary text-white font-semibold py-2 px-4 rounded-lg shadow-md">
+                    Launch Camera App
+                </button>
+            </form>
+        </div>
+        
+        <!-- MoodFood Section -->
+        <div class="mb-8 p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-inner">
+            <h2 class="text-xl font-bold text-gray-700 mb-4">MoodFood 🧠🥕 | Nutrition Guide</h2>
+            <form id="moodForm" class="flex flex-col sm:flex-row gap-4 mb-4">
+                <select id="moodSelect" class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 shadow-sm" required>
+                    <option value="">Select Your Current Mood...</option>
+                    <option value="stressed">Feeling Stressed/Anxious</option>
+                    <option value="tired">Feeling Tired/Low Energy</option>
+                    <option value="happy">Feeling Happy/Motivated</option>
+                    <option value="sad">Feeling Sad/Blue</option>
+                    <option value="hungry">Just Need a Healthy Snack</option>
+                </select>
+                <button type="submit" class="btn-primary text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
+                    Get Recommendation
+                </button>
+            </form>
+
+            <div id="moodLoading" class="text-center text-gray-500 py-6 hidden">
+                <svg class="animate-spin h-6 w-6 text-emerald-500 mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                Generating AI-powered nutrition insights...
+            </div>
+            <div id="moodResults" class="results-box p-4 bg-white rounded-lg border border-gray-300 min-h-[100px] text-gray-800 leading-relaxed overflow-y-auto">
+                <p class="text-gray-500">Select your mood above to receive a personalized food recommendation.</p>
+            </div>
+        </div>
+        
+        <!-- Mind Minutes Section (NEW) -->
+        <div class="p-6 bg-blue-50 rounded-lg border border-blue-200 shadow-inner">
+            <h2 class="text-xl font-bold text-blue-700 mb-4">Mind Minutes 🌬️ | Stress Relief</h2>
+            <form id="mindForm" class="flex flex-col sm:flex-row gap-4 mb-4">
+                <select id="mindSelect" class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm" required>
+                    <option value="">Select Your Stress Need...</option>
+                    <option value="quick calm">I need a quick 3-minute calm</option>
+                    <option value="deep focus">I need deep focus and grounding</option>
+                    <option value="sleep prep">I need to wind down for sleep</option>
+                    <option value="energy boost">I need a quick energy and mood boost</option>
+                </select>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
+                    Get Exercise
+                </button>
+            </form>
+
+            <div id="mindLoading" class="text-center text-gray-500 py-6 hidden">
+                <svg class="animate-spin h-6 w-6 text-blue-500 mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                Generating AI-powered mindfulness exercise...
+            </div>
+            <div id="mindResults" class="results-box p-4 bg-white rounded-lg border border-gray-300 min-h-[100px] text-gray-800 leading-relaxed overflow-y-auto">
+                <p class="text-gray-500">Select your stress need above to receive a quick relaxation exercise.</p>
+            </div>
+        </div>
+
+
+        <div class="mt-8 text-center">
+             <a href="{{ url_for('logout') }}" class="text-sm text-red-500 hover:text-red-700 transition duration-200 font-medium">Logout</a>
+        </div>
+    </div>
+
+    <!-- JavaScript to handle API calls for both MoodFood and Mind Minutes -->
+    <script>
+        // --- Utility Functions for clean display ---
+        function displayResults(resultsElement, loadingElement, data, colorClass, titleText) {
+            loadingElement.classList.add('hidden');
+            let html;
+
+            if (data.error) {
+                html = `<p class="text-red-500">Error: ${data.error}</p>`;
+            } else {
+                html = `<div class="p-2 mb-2">
+                            <h3 class="font-bold text-md ${colorClass} capitalize mb-1">${titleText}:</h3>
+                            <div class="text-sm">${data.text}</div>
+                        </div>`;
+                
+                if (data.sources && data.sources.length > 0) {
+                    html += '<h4 class="font-semibold mt-4 text-xs text-gray-600">Sources:</h4><ul class="list-disc list-inside text-xs text-gray-500 pl-4">';
+                    // Limit to top 3 sources for clean UI
+                    data.sources.slice(0, 3).forEach(source => { 
+                        html += `<li class="my-1"><a href="${source.uri}" target="_blank" class="hover:underline">${source.title}</a></li>`;
+                    });
+                    html += '</ul>';
+                }
+            }
+            resultsElement.innerHTML = html;
+        }
+
+        // --- PosturePal Launch Handler (Uses a POST request to Flask) ---
+        async function launchPosturePal(e) {
+            e.preventDefault();
+            const launchButton = document.querySelector('#postureForm button');
+            launchButton.disabled = true;
+            launchButton.textContent = 'Launching...';
+
+            try {
+                // Calls the Flask route /launch_posture_pal
+                const response = await fetch('{{ url_for("launch_posture_pal") }}', { method: 'POST' });
+                const data = await response.json();
+
+                if (response.ok) {
+                    // NOTE: Using alert() here as it's a critical, one-time action confirmation
+                    alert('PosturePal Launched! Please check your separate terminal window for the exercise menu and camera feed.');
+                } else {
+                    alert(`Launch Error: ${data.error || 'Failed to communicate with server.'}`);
+                }
+            } catch (error) {
+                alert('Network Error: Could not launch app. Check your Flask server connection.');
+            } finally {
+                launchButton.disabled = false;
+                launchButton.textContent = 'Launch Camera App';
+            }
+        }
+
+
+        // --- MoodFood Handler ---
+        document.getElementById('moodForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const mood = document.getElementById('moodSelect').value;
+            const moodLoading = document.getElementById('moodLoading');
+            const moodResults = document.getElementById('moodResults');
+            if (!mood) return;
+
+            moodResults.innerHTML = '';
+            moodLoading.classList.remove('hidden');
+
+            try {
+                // Calls the Flask route /get_recommendation
+                const response = await fetch('{{ url_for("get_recommendation") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mood: mood })
+                });
+                const data = await response.json();
+                displayResults(moodResults, moodLoading, data, 'text-emerald-700', 'Food Recommendation');
+
+            } catch (error) {
+                moodLoading.classList.add('hidden');
+                moodResults.innerHTML = `<p class="text-red-500">Network Error: Could not connect to server.</p>`;
+            }
+        });
+
+
+        // --- Mind Minutes Handler ---
+        document.getElementById('mindForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const mindNeed = document.getElementById('mindSelect').value;
+            const mindLoading = document.getElementById('mindLoading');
+            const mindResults = document.getElementById('mindResults');
+            if (!mindNeed) return;
+
+            mindResults.innerHTML = '';
+            mindLoading.classList.remove('hidden');
+
+            try {
+                // Calls the Flask route /get_mindfulness
+                const response = await fetch('{{ url_for("get_mindfulness") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ need: mindNeed })
+                });
+                const data = await response.json();
+                displayResults(mindResults, mindLoading, data, 'text-blue-700', 'Mindfulness Exercise');
+
+            } catch (error) {
+                mindLoading.classList.add('hidden');
+                mindResults.innerHTML = `<p class="text-red-500">Network Error: Could not connect to server.</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
